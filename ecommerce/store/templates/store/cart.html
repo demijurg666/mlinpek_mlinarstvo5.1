@@ -1,0 +1,210 @@
+{% load static %} {% load i18n %}
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Mlinpek mlinarstvo</title>
+    <link
+      rel="icon"
+      href="{% static 'image/mlinpek logo.png' %}"
+      type="image/x-icon"
+    />
+
+    <script src="{% static 'js/cart.js' %}"></script>
+
+    <script type="text/javascript">
+      let user = "{{request.user}}";
+
+      function getToken(name) {
+        let cookieValue = null;
+        if (document.cookie && document.cookie !== "") {
+          let cookies = document.cookie.split(";");
+          for (let i = 0; i < cookies.length; i++) {
+            let cookie = cookies[i].trim();
+            // Does this cookie string begin with the name we want?
+            if (cookie.substring(0, name.length + 1) === name + "=") {
+              cookieValue = decodeURIComponent(
+                cookie.substring(name.length + 1)
+              );
+              break;
+            }
+          }
+        }
+        return cookieValue;
+      }
+      let csrftoken = getToken("csrftoken");
+    </script>
+  </head>
+  <body>
+    <!--Imao si problem sa renderovanjem iz admin panela, ne prikazuju se podaci jer ih admin panel ne prepoznaje-->
+    {%include 'store/nav.html'%} {% block content %}
+    <h1>{% translate 'Korpa' %}</h1>
+
+    <button class="btn btn-dark Continue">
+      <a
+        href="{% url 'trgovina' %}"
+        style="text-decoration: none; color: white"
+      >
+        {% translate 'Nastavi sa kupovinom' %}</a
+      >
+    </button>
+    <div class="row borders">
+      <div class="">
+        <div class="">
+          <hr />
+        </div>
+        <div class="row">
+          <div class="col">
+            <b> {% translate 'Stvari u korpi:' %}{{order.get_cart_items}}</b>
+          </div>
+          <div class="col">
+            <b>
+              {% translate 'Ukupno:' %}{{order.get_cart_total|floatformat:2}}
+              e</b
+            >
+          </div>
+          <div class="col">
+            <button class="btn btn-success checkout">
+              <a
+                href="{% url 'checkout' %}"
+                style="text-decoration: none; color: white"
+              >
+                {% translate 'Kasa' %}
+              </a>
+            </button>
+          </div>
+        </div>
+        <br />
+        <hr />
+
+        <div class="row">
+          <div class="col">
+            <b> {% translate 'Slika:' %}</b>
+          </div>
+          <div class="col">
+            <b> {% translate 'Proizvod:' %}</b>
+          </div>
+          <div class="col">
+            <b> {% translate 'Cena:' %}</b>
+          </div>
+          <div class="col">
+            <b> {% translate 'Kolicina:' %}</b>
+          </div>
+          <div class="col">
+            <b> {% translate 'Ukupno:' %}</b>
+          </div>
+        </div>
+
+        {% for item in items %}
+        <div class="row korpa">
+          <div class="col">
+            <img src="{{item.product.imageURL}}" alt="" class="slike" />
+          </div>
+          <div class="col">
+            <p>{{item.product.name}}</p>
+          </div>
+
+          <div class="col">
+            <p>{{item.product.price|floatformat:2}}e</p>
+          </div>
+
+          <div class="col">
+            <p class="quantity">{{item.quantity}}</p>
+            <div class="quantity">
+              <img
+                data-product="{{item.product.id}}"
+                data-action="add"
+                src="{% static 'image/gore.png' %}"
+                alt=""
+                class="chg-quantity update-cart"
+                onclick="updateCart()"
+              />
+              <img
+                data-product="{{item.product.id}}"
+                data-action="remove"
+                src="{% static 'image/dole.png' %}"
+                alt=""
+                class="chg-quantity update-cart"
+                onclick="updateCart()"
+              />
+            </div>
+          </div>
+
+          <div class="col">{{item.get_total}} e</div>
+        </div>
+        {% endfor %}
+      </div>
+    </div>
+
+    <style>
+      .Continue {
+        text-align: left;
+      }
+      .borders {
+        border: black 1px solid;
+        margin-top: 50px;
+        margin-left: 2px;
+        box-shadow: hsl(0, 0%, 80%) 0 0 16px;
+      }
+      .slike {
+        width: 200px;
+        height: 200px;
+      }
+
+      b {
+        font-size: 25px;
+      }
+      .korpa p {
+        font-size: 20px;
+      }
+      .quantity {
+        display: inline-block;
+        font-weight: 700;
+        padding-right: 10px;
+      }
+
+      .chg-quantity {
+        width: 12px;
+        height: 12px;
+        cursor: pointer;
+        display: block;
+        margin-top: 5px;
+        transition: 0.1s;
+      }
+
+      .chg-quantity:hover {
+        opacity: 0.6;
+      }
+
+      .korpa {
+        margin-top: 20px;
+      }
+
+      @media only screen and (min-width: 360px) and (max-width: 768px) {
+        .Continue {
+          width: 90px;
+          height: 40px;
+          font-size: 10px;
+        }
+        .checkout {
+          width: 90px;
+          height: 35px;
+          font-size: 15px;
+        }
+        b {
+          font-size: 15px;
+        }
+        .slike {
+          width: 70px;
+          height: 100px;
+        }
+        .korpa p {
+          font-size: 12px;
+        }
+      }
+    </style>
+  </body>
+</html>
+{% endblock content %}
